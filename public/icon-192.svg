@@ -1,4 +1,53 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
-  <rect width="192" height="192" rx="32" fill="#2563eb"/>
-  <text x="96" y="120" text-anchor="middle" font-family="Arial,sans-serif" font-size="100" font-weight="bold" fill="white">R</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="bar1" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#7dd3fc"/>
+    </linearGradient>
+    <linearGradient id="bar2" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#c4b5fd"/>
+    </linearGradient>
+    <linearGradient id="bar3" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#2dd4bf"/>
+      <stop offset="100%" stop-color="#5eead4"/>
+    </linearGradient>
+    <linearGradient id="bar4" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#fcd34d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="192" height="192" rx="40" fill="url(#bg)"/>
+
+  <!-- Subtle radial glow -->
+  <circle cx="140" cy="50" r="80" fill="white" opacity="0.06"/>
+
+  <!-- Document shape -->
+  <rect x="44" y="32" width="104" height="128" rx="12" fill="white" opacity="0.12"/>
+  <rect x="48" y="36" width="96" height="120" rx="10" fill="white" opacity="0.10"/>
+
+  <!-- Header lines on document -->
+  <rect x="62" y="50" width="48" height="5" rx="2.5" fill="white" opacity="0.5"/>
+  <rect x="62" y="60" width="32" height="3" rx="1.5" fill="white" opacity="0.25"/>
+
+  <!-- Chart bars (Q1-Q4 color coded) -->
+  <rect x="62" y="108" width="16" height="36" rx="4" fill="url(#bar1)"/>
+  <rect x="84" y="92" width="16" height="52" rx="4" fill="url(#bar2)"/>
+  <rect x="106" y="100" width="16" height="44" rx="4" fill="url(#bar3)"/>
+  <rect x="128" y="80" width="16" height="64" rx="4" fill="url(#bar4)"/>
+
+  <!-- Trend line -->
+  <polyline points="70,106 92,88 114,96 136,78" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+
+  <!-- Trend line dots -->
+  <circle cx="70" cy="106" r="3" fill="white" opacity="0.9"/>
+  <circle cx="92" cy="88" r="3" fill="white" opacity="0.9"/>
+  <circle cx="114" cy="96" r="3" fill="white" opacity="0.9"/>
+  <circle cx="136" cy="78" r="3" fill="white" opacity="0.9"/>
 </svg>
