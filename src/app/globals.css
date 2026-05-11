@@ -3,3 +3,13 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
 }
+
+body {
+  background: linear-gradient(170deg, #0c1222 0%, #0a0f1a 50%, #0d1117 100%);
+}
+
+@property --glow-opacity {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
