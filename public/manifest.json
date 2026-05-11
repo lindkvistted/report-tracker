@@ -1,0 +1,16 @@
+{
+  "name": "Report Tracker",
+  "short_name": "Reports",
+  "description": "Track quarterly and annual report releases",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
