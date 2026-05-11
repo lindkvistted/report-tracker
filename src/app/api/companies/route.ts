@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getCompanies, addCompany } from "@/lib/db";
 
 export async function GET() {
-  return NextResponse.json(getCompanies());
+  const companies = await getCompanies();
+  return NextResponse.json(companies);
 }
 
 export async function POST(req: Request) {
@@ -10,6 +11,6 @@ export async function POST(req: Request) {
   if (!name || !investorUrl) {
     return NextResponse.json({ error: "name and investorUrl required" }, { status: 400 });
   }
-  const company = addCompany(name, investorUrl, reportDates || []);
+  const company = await addCompany(name, investorUrl, reportDates || []);
   return NextResponse.json(company, { status: 201 });
 }

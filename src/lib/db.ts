@@ -1,11 +1,10 @@
-import fs from "fs";
-import path from "path";
+import { Redis } from "@upstash/redis";
 import { v4 as uuidv4 } from "uuid";
 
 export interface ReportDate {
   id: string;
   type: "Q1" | "Q2" | "Q3" | "Q4" | "Annual";
-  date: string; // ISO date string YYYY-MM-DD
+  date: string;
   notified: boolean;
 }
 
@@ -16,43 +15,43 @@ export interface Company {
   reportDates: ReportDate[];
 }
 
-export interface PushSubscription {
+export interface PushSub {
   endpoint: string;
   keys: { p256dh: string; auth: string };
 }
 
-interface DB {
-  companies: Company[];
-  subscriptions: PushSubscription[];
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+});
+
+const COMPANIES_KEY = "companies";
+const SUBS_KEY = "subscriptions";
+
+async function getAll(): Promise<Company[]> {
+  const data = await redis.get<Company[]>(COMPANIES_KEY);
+  return data ?? [];
 }
 
-const DB_PATH = path.join(process.cwd(), "data.json");
-
-function read(): DB {
-  if (!fs.existsSync(DB_PATH)) {
-    return { companies: [], subscriptions: [] };
-  }
-  return JSON.parse(fs.readFileSync(DB_PATH, "utf-8"));
+async function saveAll(companies: Company[]) {
+  await redis.set(COMPANIES_KEY, companies);
 }
 
-function write(db: DB) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+export async function getCompanies(): Promise<Company[]> {
+  return getAll();
 }
 
-export function getCompanies(): Company[] {
-  return read().companies;
+export async function getCompany(id: string): Promise<Company | undefined> {
+  const companies = await getAll();
+  return companies.find((c) => c.id === id);
 }
 
-export function getCompany(id: string): Company | undefined {
-  return read().companies.find((c) => c.id === id);
-}
-
-export function addCompany(
+export async function addCompany(
   name: string,
   investorUrl: string,
   reportDates: Omit<ReportDate, "id" | "notified">[]
-): Company {
-  const db = read();
+): Promise<Company> {
+  const companies = await getAll();
   const company: Company = {
     id: uuidv4(),
     name,
@@ -63,58 +62,59 @@ export function addCompany(
       notified: false,
     })),
   };
-  db.companies.push(company);
-  write(db);
+  companies.push(company);
+  await saveAll(companies);
   return company;
 }
 
-export function updateCompany(
+export async function updateCompany(
   id: string,
   data: { name?: string; investorUrl?: string; reportDates?: Omit<ReportDate, "id" | "notified">[] }
-): Company | null {
-  const db = read();
-  const idx = db.companies.findIndex((c) => c.id === id);
+): Promise<Company | null> {
+  const companies = await getAll();
+  const idx = companies.findIndex((c) => c.id === id);
   if (idx === -1) return null;
-  if (data.name) db.companies[idx].name = data.name;
-  if (data.investorUrl) db.companies[idx].investorUrl = data.investorUrl;
+  if (data.name) companies[idx].name = data.name;
+  if (data.investorUrl) companies[idx].investorUrl = data.investorUrl;
   if (data.reportDates) {
-    db.companies[idx].reportDates = data.reportDates.map((r) => ({
+    companies[idx].reportDates = data.reportDates.map((r) => ({
       ...r,
       id: uuidv4(),
       notified: false,
     }));
   }
-  write(db);
-  return db.companies[idx];
+  await saveAll(companies);
+  return companies[idx];
 }
 
-export function deleteCompany(id: string): boolean {
-  const db = read();
-  const before = db.companies.length;
-  db.companies = db.companies.filter((c) => c.id !== id);
-  write(db);
-  return db.companies.length < before;
+export async function deleteCompany(id: string): Promise<boolean> {
+  const companies = await getAll();
+  const filtered = companies.filter((c) => c.id !== id);
+  if (filtered.length === companies.length) return false;
+  await saveAll(filtered);
+  return true;
 }
 
-export function getSubscriptions(): PushSubscription[] {
-  return read().subscriptions;
+export async function getSubscriptions(): Promise<PushSub[]> {
+  const data = await redis.get<PushSub[]>(SUBS_KEY);
+  return data ?? [];
 }
 
-export function addSubscription(sub: PushSubscription) {
-  const db = read();
-  const exists = db.subscriptions.some((s) => s.endpoint === sub.endpoint);
+export async function addSubscription(sub: PushSub) {
+  const subs = await getSubscriptions();
+  const exists = subs.some((s) => s.endpoint === sub.endpoint);
   if (!exists) {
-    db.subscriptions.push(sub);
-    write(db);
+    subs.push(sub);
+    await redis.set(SUBS_KEY, subs);
   }
 }
 
-export function markNotified(companyId: string, reportDateId: string) {
-  const db = read();
-  const company = db.companies.find((c) => c.id === companyId);
+export async function markNotified(companyId: string, reportDateId: string) {
+  const companies = await getAll();
+  const company = companies.find((c) => c.id === companyId);
   if (company) {
     const rd = company.reportDates.find((r) => r.id === reportDateId);
     if (rd) rd.notified = true;
-    write(db);
+    await saveAll(companies);
   }
 }

@@ -9,8 +9,8 @@ webpush.setVapidDetails(
 );
 
 export async function POST() {
-  const companies = getCompanies();
-  const subscriptions = getSubscriptions();
+  const companies = await getCompanies();
+  const subscriptions = await getSubscriptions();
   const today = new Date().toISOString().slice(0, 10);
 
   const notifications: { company: string; type: string }[] = [];
@@ -32,7 +32,7 @@ export async function POST() {
           }
         }
 
-        markNotified(company.id, rd.id);
+        await markNotified(company.id, rd.id);
         notifications.push({ company: company.name, type: rd.type });
       }
     }
