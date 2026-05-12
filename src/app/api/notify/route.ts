@@ -8,7 +8,7 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!
 );
 
-export async function POST() {
+async function sendNotifications() {
   const companies = await getCompanies();
   const subscriptions = await getSubscriptions();
   const today = new Date().toISOString().slice(0, 10);
@@ -39,4 +39,12 @@ export async function POST() {
   }
 
   return NextResponse.json({ sent: notifications });
+}
+
+export async function GET() {
+  return sendNotifications();
+}
+
+export async function POST() {
+  return sendNotifications();
 }
